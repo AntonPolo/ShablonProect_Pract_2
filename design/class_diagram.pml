@@ -1,41 +1,32 @@
 @startuml
-interface RequestRepository {
+interface RequestSource {
     +boolean exists(String studentId, String topic)
     +int save(Request request)
 }
 
-interface NotificationService {
-    +void send(String studentId, String message)
-}
-
-interface AuditLogger {
-    +void log(String message)
-}
-
 class RequestService {
-    -repository: RequestRepository
+    -source: RequestSource
     -notifier: NotificationService
     -logger: AuditLogger
-    +String process(String studentId, String topic, String text, String channel, boolean urgent)
+    +String process(...)
 }
 
-class Request {
-    -studentId: String
-    -topic: String
-    -text: String
-    -status: String
+class RequestSourceFactory {
+    +static RequestSource create()
 }
 
-RequestService --> RequestRepository
-RequestService --> NotificationService
-RequestService --> AuditLogger
+class DatabaseRequestSource
+class FileRequestSource
+class WebRequestSource
 
-class DatabaseRequestRepository
-class EmailNotificationService
-class FileAuditLogger
+RequestService --> RequestSource
+RequestSourceFactory --> RequestSource
+DatabaseRequestSource ..|> RequestSource
+FileRequestSource ..|> RequestSource
+WebRequestSource ..|> RequestSource
 
-DatabaseRequestRepository ..|> RequestRepository
-EmailNotificationService ..|> NotificationService
-FileAuditLogger ..|> AuditLogger
-
+note right of RequestSourceFactory
+  Читает config.properties
+  и создаёт нужную реализацию
+end note
 @enduml
